@@ -6,6 +6,9 @@ var rotation_speed = 5.0
 var speed = 5.0
 var max_speed = 400.0
 
+onready var Explosion = load("res://Effects/Explosion.tscn")
+var Effects = null
+var health = 10.0
 
 onready var Bullet = load("res://Player/Bullet.tscn")
 var nose = Vector2(0,-60)
@@ -43,3 +46,19 @@ func get_input():
 	return to_return.rotated(rotation)
 	
 		
+func damage(d):
+	health -= d;
+	if health <= 0:
+		Effects = get_node_or_null("/root/Game/Effects")
+		if Effects != null:
+			var explosion = Explosion.instance()
+			Effects.add_child(explosion)
+			explosion.global_position = self.global_position
+			hide()
+			yield(explosion, "animation_finished")
+		queue_free()
+
+
+func _on_Area2D_body_exited(body):
+	if body.name != "Player":
+		damage(100)
